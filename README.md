@@ -2,7 +2,7 @@
 
 > **From quro-doc documents to a self-contained, searchable static site.**
 
-Quro Notebook is a static site generator that builds a searchable notebook from [quro-doc](https://github.com/anomalyco/quro-doc) documents. It has no runtime server — the build phase produces a fully self-contained static site served by any static file server.
+Quro Notebook is a static site generator that builds a searchable notebook from [quro-doc](https://github.com/quro-community/quro-doc) documents. It has no runtime server — the build phase produces a fully self-contained static site served by any static file server.
 
 ---
 
