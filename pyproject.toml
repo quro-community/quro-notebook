@@ -1,0 +1,25 @@
+[project]
+name = "quro-notebook"
+version = "0.1.0"
+description = "Static site generator that builds a searchable notebook from quro-doc documents"
+requires-python = ">=3.13"
+dependencies = [
+    "quro-doc>=0.2.0",
+    "mistune>=3.0",
+    "Jinja2>=3.1",
+    "sentence-transformers>=3.0",
+]
+
+[project.scripts]
+quro-notebook = "quro_notebook.cli:main"
+quro-notebook-build = "quro_notebook.build:main"
+quro-notebook-fetch-assets = "quro_notebook.assets:main"
+
+[tool.quro-notebook.assets]
+minisearch = "https://cdn.jsdelivr.net/npm/minisearch@7.1.2/dist/umd/index.min.js"
+transformers_js = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.0/dist/transformers.min.js"
+google_fonts_css = "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Roboto:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
