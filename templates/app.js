@@ -207,6 +207,19 @@
     activateAskAi();
     highlightActiveToc();
 
+    var tocLinks = content.querySelectorAll(".page-toc a");
+    tocLinks.forEach(function (link) {
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        var targetId = link.getAttribute("href").slice(1);
+        var target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          window.location.hash = targetId;
+        }
+      });
+    });
+
     window.scrollTo({ top: 0, behavior: "instant" });
   }
 
@@ -453,7 +466,12 @@
   function onIndexReady() {
     var hash = window.location.hash.slice(1);
     if (hash) {
-      APP.navigateTo(hash);
+      var pageData = findPage(hash);
+      if (pageData) {
+        APP.navigateTo(hash);
+      } else {
+        APP.showPageList();
+      }
     } else {
       APP.showPageList();
     }
@@ -466,7 +484,10 @@
     window.addEventListener("hashchange", function () {
       var docId = window.location.hash.slice(1);
       if (docId) {
-        APP.navigateTo(docId);
+        var pageData = findPage(docId);
+        if (pageData) {
+          APP.navigateTo(docId);
+        }
       } else {
         APP.backToList();
       }
