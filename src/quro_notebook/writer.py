@@ -44,6 +44,19 @@ def write_embeddings(embeddings: dict[str, Any], output_dir: str) -> None:
 _cdn_cache: dict[str, str] | None = None
 
 
+def _resolve_templates_dir() -> Path:
+    package_root = Path(__file__).resolve().parent
+    # Wheel install: templates bundled inside quro_notebook/templates/
+    wheel_candidate = package_root / "templates"
+    if wheel_candidate.is_dir():
+        return wheel_candidate
+    # Editable install / dev: templates at project root
+    project_candidate = package_root.parent.parent / "templates"
+    if project_candidate.is_dir():
+        return project_candidate
+    return project_candidate
+
+
 def _cdn_replacements(asset_dir: Path, *, skip_fonts: bool = False, style_name: str = "default") -> dict[str, str]:
     global _cdn_cache
     cache_key = ("cdn", skip_fonts, style_name)
@@ -84,7 +97,7 @@ def _cdn_replacements(asset_dir: Path, *, skip_fonts: bool = False, style_name: 
             css = fetch_google_fonts_css()
             fonts_dir = asset_dir / "css" / "fonts"
             _ensure_dir(fonts_dir)
-            localized_css, font_files = localize_google_fonts_css(css, "fonts/")
+            localized_css, font_files = localize_google_fonts_css(css, "")
             fonts_css.write_text(localized_css, encoding="utf-8")
             for filename, data in font_files:
                 (fonts_dir / filename).write_bytes(data)
@@ -97,7 +110,7 @@ def _cdn_replacements(asset_dir: Path, *, skip_fonts: bool = False, style_name: 
                 style_css = fetch_asset(STYLE_FONT_MAP[style_name], timeout=10).decode("utf-8")
                 fonts_dir = asset_dir / "css" / "fonts"
                 _ensure_dir(fonts_dir)
-                localized_css, font_files = localize_google_fonts_css(style_css, "fonts/")
+                localized_css, font_files = localize_google_fonts_css(style_css, "")
                 style_fonts_css.write_text(localized_css, encoding="utf-8")
                 for filename, data in font_files:
                     dest = fonts_dir / filename
@@ -112,9 +125,8 @@ def _cdn_replacements(asset_dir: Path, *, skip_fonts: bool = False, style_name: 
 
 
 def write_static_assets(output_dir: str, *, skip_fonts: bool = False, style_name: str = "default") -> None:
-    package_root = Path(__file__).resolve().parent
-    project_root = package_root.parent.parent
-    templates_dir = project_root / "templates"
+    templates_dir = _resolve_templates_dir()
+    print(f"[write_static_assets] templates_dir={templates_dir} exists={templates_dir.is_dir()}")
     assets_dir = Path(output_dir) / "assets"
     _ensure_dir(assets_dir)
 
@@ -126,16 +138,21 @@ def write_static_assets(output_dir: str, *, skip_fonts: bool = False, style_name
     _ensure_dir(js_dir)
 
     css_files = list(templates_dir.glob("*.css"))
+    print(f"[write_static_assets] css_files={[f.name for f in css_files]}")
     for f in css_files:
         shutil.copy2(str(f), str(css_dir / f.name))
 
     js_files = list(templates_dir.glob("*.js"))
+    print(f"[write_static_assets] js_files={[f.name for f in js_files]}")
     for f in js_files:
         shutil.copy2(str(f), str(js_dir / f.name))
 
     index_html = templates_dir / "index.html"
+    print(f"[write_static_assets] index_html={index_html} exists={index_html.exists()}")
     if index_html.exists():
         shutil.copy2(str(index_html), str(Path(output_dir) / "index.html"))
+    else:
+        print("[write_static_assets] WARNING: index.html template not found, _output/index.html not created")
 
     for js_file in js_files:
         dest = js_dir / js_file.name
@@ -158,11 +175,24 @@ def write_static_assets(output_dir: str, *, skip_fonts: bool = False, style_name
     else:
         style_dest.write_text("/* " + style_name + " style — using theme.css defaults */\n", encoding="utf-8")
 
-def write_index_html(output_dir: str, index: dict[str, Any], pages_html: dict[str, str], *, skip_fonts: bool = False) -> None:
-    index_path = Path(output_dir) / "index.html"
-    if not index_path.exists():
-        return
-    html = index_path.read_text(encoding="utf-8")
+def write_index_html(output_dir: str, index: dict[str, Any], pages_html: dict[str, str], *, skip_fonts: bool = False, style_name: str = "default") -> None:
+    templates_dir = _resolve_templates_dir()
+    template_path = templates_dir / "index.html"
+    print(f"[write_index_html] templates_dir={templates_dir} exists={templates_dir.is_dir()}")
+    print(f"[write_index_html] template_path={template_path} exists={template_path.exists()}")
+
+    if template_path.exists():
+        html = template_path.read_text(encoding="utf-8")
+        print("[write_index_html] read template from source")
+    else:
+        index_path = Path(output_dir) / "index.html"
+        print(f"[write_index_html] template not found, checking fallback: index_path={index_path} exists={index_path.exists()}")
+        if not index_path.exists():
+            print("[write_index_html] WARNING: no template and no fallback, index.html not written")
+            return
+        html = index_path.read_text(encoding="utf-8")
+        print("[write_index_html] read template from fallback (_output/index.html)")
+
     index_json = json.dumps(index, ensure_ascii=False)
     html = html.replace("__QURO_INDEX_DATA__", index_json)
 
@@ -175,9 +205,11 @@ def write_index_html(output_dir: str, index: dict[str, Any], pages_html: dict[st
         fragments.append(f'<script type="text/x-quro-page" id="quro-page-{doc_id}" data-encoding="base64">{b64}</script>')
     html = html.replace("__QURO_PAGE_FRAGMENTS__", "\n".join(fragments))
 
-    replacements = _cdn_replacements(Path(output_dir) / "assets", skip_fonts=skip_fonts)
+    replacements = _cdn_replacements(Path(output_dir) / "assets", skip_fonts=skip_fonts, style_name=style_name)
     html = html.replace("__MINISEARCH_URL__", replacements["minisearch_url"])
 
+    _ensure_dir(Path(output_dir))
+    index_path = Path(output_dir) / "index.html"
     index_path.write_text(html, encoding="utf-8")
 
 

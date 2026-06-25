@@ -108,7 +108,7 @@ def build(
     write_config(config, output_dir)
 
     write_static_assets(output_dir, skip_fonts=no_fonts, style_name=style_name)
-    write_index_html(output_dir, index, pages_html, skip_fonts=no_fonts)
+    write_index_html(output_dir, index, pages_html, skip_fonts=no_fonts, style_name=style_name)
 
 
 def main() -> None:

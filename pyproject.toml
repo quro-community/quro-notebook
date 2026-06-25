@@ -20,6 +20,9 @@ minisearch = "https://cdn.jsdelivr.net/npm/minisearch@7.1.2/dist/umd/index.min.j
 transformers_js = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.0/dist/transformers.min.js"
 google_fonts_css = "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Roboto:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
 
+[tool.hatch.build.targets.wheel]
+force-include."templates" = "quro_notebook/templates"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
