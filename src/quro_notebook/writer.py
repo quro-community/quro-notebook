@@ -84,7 +84,7 @@ def _cdn_replacements(asset_dir: Path, *, skip_fonts: bool = False, style_name: 
             css = fetch_google_fonts_css()
             fonts_dir = asset_dir / "css" / "fonts"
             _ensure_dir(fonts_dir)
-            localized_css, font_files = localize_google_fonts_css(css, "")
+            localized_css, font_files = localize_google_fonts_css(css, "fonts/")
             fonts_css.write_text(localized_css, encoding="utf-8")
             for filename, data in font_files:
                 (fonts_dir / filename).write_bytes(data)
@@ -97,7 +97,7 @@ def _cdn_replacements(asset_dir: Path, *, skip_fonts: bool = False, style_name: 
                 style_css = fetch_asset(STYLE_FONT_MAP[style_name], timeout=10).decode("utf-8")
                 fonts_dir = asset_dir / "css" / "fonts"
                 _ensure_dir(fonts_dir)
-                localized_css, font_files = localize_google_fonts_css(style_css, "")
+                localized_css, font_files = localize_google_fonts_css(style_css, "fonts/")
                 style_fonts_css.write_text(localized_css, encoding="utf-8")
                 for filename, data in font_files:
                     dest = fonts_dir / filename
