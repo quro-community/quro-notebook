@@ -12,7 +12,7 @@ class PageEntrySchema:
     doc_id: str
     title: str
     created_at: str
-    intent: Optional[str] = None
+    classification: Optional[str] = None
     tags: list[str] = field(default_factory=list)
     topic: Optional[str] = None
     source_path: str = ""
@@ -51,7 +51,7 @@ class PageFragmentSchema:
     created_at: str
     body_html: str
     toc_html: str
-    intent: Optional[str] = None
+    classification: Optional[str] = None
     tags: list[str] = field(default_factory=list)
     source_path: str = ""
     build_time: str = field(default_factory=lambda: datetime.utcnow().isoformat() + "Z")

@@ -68,7 +68,7 @@ def build(
             "doc_id": doc_id,
             "title": title,
             "created_at": entry["created_at"],
-            "intent": entry.get("intent"),
+            "classification": entry.get("classification"),
             "tags": entry.get("tags", []),
             "source_path": source_path,
         }

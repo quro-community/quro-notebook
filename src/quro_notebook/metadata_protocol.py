@@ -50,10 +50,16 @@ QURO_NOTEBOOK_METADATA_SET: Final[list[dict[str, str]]] = [
         "map_to": "topic",
     },
     {
-        "key": "intent",
-        "description": "Purpose of the document (e.g. specification, analysis, how-to)",
+        "key": "classification",
+        "description": "Document type classification (e.g. specification, analysis, how-to)",
         "domain": "string",
-        "map_to": "intent",
+        "map_to": "classification",
+    },
+    {
+        "key": "summary",
+        "description": "Concise description of the document content",
+        "domain": "string",
+        "map_to": "summary",
     },
     {
         "key": "tags",

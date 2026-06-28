@@ -10,7 +10,7 @@ PAGE_TEMPLATE = Template("""\
     <h1 class="page-title">{{ title }}</h1>
     <div class="page-meta">
       <time datetime="{{ created_at }}">{{ formatted_date }}</time>
-      {% if intent %}<span class="page-intent">{{ intent }}</span>{% endif %}
+      {% if classification %}<span class="page-classification">{{ classification }}</span>{% endif %}
     </div>
     {% if tags %}
     <div class="page-tags">
@@ -119,7 +119,7 @@ def render_page(body_markdown: str, metadata: dict) -> str:
     title = metadata.get("title", "Untitled")
     doc_id = metadata.get("doc_id", "")
     created_at = metadata.get("created_at", "")
-    intent = metadata.get("intent")
+    classification = metadata.get("classification")
     tags = metadata.get("tags", [])
     source_path = metadata.get("source_path", "")
 
@@ -134,7 +134,7 @@ def render_page(body_markdown: str, metadata: dict) -> str:
         title=title,
         created_at=created_at,
         formatted_date=formatted_date,
-        intent=intent,
+        classification=classification,
         tags=tags,
         source_path=source_path,
         toc_html=toc_html,
